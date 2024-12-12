@@ -9,8 +9,7 @@
     "test": "jest",
     "prepare": "husky",
     "lint-staged": {
-      "*": "prettier --write",
-      "*.ts": "eslint --fix"
+      "**/*": "lint:fix"
     },
     "build": "npx webpack --mode=production --config webpack.config.js",
     "dev": "webpack serve  --mode=development"
