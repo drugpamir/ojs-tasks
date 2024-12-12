@@ -4,12 +4,13 @@
   "description": "Simple Task Manager",
   "main": "index.html",
   "scripts": {
-    "lint": "eslint . && prettier . --check",
-    "lint:fix": "eslint . --fix && prettier . --write --ignore-unknown",
+    "lint": "eslint . && prettier --check",
+    "lint:fix": "eslint --fix && prettier --write --ignore-unknown",
     "test": "jest",
     "prepare": "husky",
     "lint-staged": {
-      "**/*": "lint:fix"
+      "*": "prettier --write",
+      "*.ts": "eslint --fix"
     },
     "build": "npx webpack --mode=production --config webpack.config.js",
     "dev": "webpack serve  --mode=development"
