@@ -4,6 +4,26 @@ import { generateID } from "../utils/dataGenerator";
 export class CalendarLocalStorage implements CalendarApi {
   #tasksStorageKey: string = "tasks";
 
+  #getTasksSync(): Task[] {
+    const storedTasks = localStorage.getItem(this.#tasksStorageKey);
+    if (!storedTasks) {
+      return [];
+    }
+    const tasks: Task[] = JSON.parse(storedTasks);
+    return tasks;
+  }
+
+  async getTasks(): Promise<Task[]> {
+    return this.#getTasksSync();
+  }
+
+  async getTasksByDate(dateFrom: Date, dateTo: Date): Promise<Task[]> {
+    const storedTasks: Task[] = this.#getTasksSync();
+    return storedTasks.filter(
+      (task) => task.date >= dateFrom && task.date <= dateTo,
+    );
+  }
+
   async createTask(
     newTaskFields: Omit<Task, "id" | "createdAt">,
   ): Promise<Task> {
@@ -61,25 +81,5 @@ export class CalendarLocalStorage implements CalendarApi {
     const newTasks = storedTasks.filter((task) => task.id !== taskToRemove.id);
     localStorage.setItem(this.#tasksStorageKey, JSON.stringify(newTasks));
     return this.#getTasksSync();
-  }
-
-  #getTasksSync(): Task[] {
-    const storedTasks = localStorage.getItem(this.#tasksStorageKey);
-    if (!storedTasks) {
-      return [];
-    }
-    const tasks: Task[] = JSON.parse(storedTasks);
-    return tasks;
-  }
-
-  async getTasks(): Promise<Task[]> {
-    return this.#getTasksSync();
-  }
-
-  async getTasksByDate(dateFrom: Date, dateTo: Date): Promise<Task[]> {
-    const storedTasks: Task[] = this.#getTasksSync();
-    return storedTasks.filter(
-      (task) => task.date >= dateFrom && task.date <= dateTo,
-    );
   }
 }
