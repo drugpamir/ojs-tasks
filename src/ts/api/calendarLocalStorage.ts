@@ -4,11 +4,14 @@ import { generateID } from "../utils/dataGenerator";
 export class CalendarLocalStorage implements CalendarApi {
   #tasksStorageKey: string = "tasks";
 
-  async createTask(newTaskFields: Omit<Task, "id">): Promise<Task> {
+  async createTask(
+    newTaskFields: Omit<Task, "id" | "createdAt">,
+  ): Promise<Task> {
     const id = generateID();
     const newTask: Task = {
       ...newTaskFields,
       id: id,
+      createdAt: new Date(),
     };
 
     const storedTasks: Task[] = await this.getTasks();

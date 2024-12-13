@@ -7,7 +7,7 @@ export type Task = {
 };
 
 export interface CalendarApi {
-  createTask(addedTask: Omit<Task, "id">): Promise<Task>;
+  createTask(addedTasks: Omit<Task, "id" | "createdAt">): Promise<Task>;
 
   updateTask(updatedTask: Partial<Task>): Promise<Task>;
 
