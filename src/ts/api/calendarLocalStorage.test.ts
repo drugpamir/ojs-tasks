@@ -15,19 +15,10 @@ describe("tasks local storage", () => {
   });
 
   it("getTasks() returns expected tasks count after them added", async () => {
-    // const tasksPromises: Promise<Task>[] = [1, 2, 4, 6, 5, 12]
-    //   .map((num) => generateTask(num))
-    //   .map((task) => calendarLocalStorage.createTask(task));
-    // const tasksToCreate = await Promise.all(tasksPromises);
-
-    const tasksToCreate = [
-      await calendarLocalStorage.createTask(generateTask(2)),
-      await calendarLocalStorage.createTask(generateTask(4)),
-      await calendarLocalStorage.createTask(generateTask(7)),
-      await calendarLocalStorage.createTask(generateTask(32)),
-      await calendarLocalStorage.createTask(generateTask(3)),
-      await calendarLocalStorage.createTask(generateTask(4)),
-    ];
+    const tasksPromises = [1, 2, 4, 6, 5, 12]
+      .map((num) => generateTask(num))
+      .map((task) => calendarLocalStorage.createTask(task));
+    const tasksToCreate = await Promise.all(tasksPromises);
 
     const storedTasks = await calendarLocalStorage.getTasks();
     console.log(storedTasks);
