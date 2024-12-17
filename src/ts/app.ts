@@ -1,6 +1,6 @@
 import { CalendarApi, type Task } from "./api/calendarApi";
-import { CalendarLocalStorage } from "./api/calendarLocalStorage";
-// import { generateTask } from "./utils/dataGenerator";
+import { CalendarDummyStorage } from "./api/calendarDummyStorage";
+// import { CalendarLocalStorage } from "./api/calendarLocalStorage";
 import {
   toDatePickerString,
   toDatePickerStringDaysFromNow,
@@ -16,10 +16,6 @@ export async function runApp(el: HTMLElement) {
   renderTaskListHTML(el);
   setCalendarApi();
   addListeners();
-
-  // const task = await calendarApi.createTask(generateTask(1));
-  // console.log(task);
-
   fillTasksTable(dateFrom, dateTo);
 }
 
@@ -94,7 +90,7 @@ async function fillTasksTable(
 }
 
 function setCalendarApi() {
-  calendarApi = new CalendarLocalStorage();
+  calendarApi = new CalendarDummyStorage();
 }
 
 function renderTaskListHTML(el: HTMLElement) {
