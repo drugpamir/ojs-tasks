@@ -56,7 +56,10 @@ function addListeners(/*el: HTMLElement*/) {
 
   btnAddTask?.addEventListener("click", () => {});
 
-  tasksTable?.addEventListener("click", () => {});
+  tasksTable.addEventListener("click", (ev) => {
+    const rowElement = (ev.target as HTMLElement).closest("tr");
+    rowElement?.classList.toggle("tr-selected");
+  });
 }
 
 async function fillTasksTable(
