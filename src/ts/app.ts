@@ -1,12 +1,22 @@
+import { CalendarApi, type Task } from "./api/calendarApi";
+import { CalendarLocalStorage } from "./api/calendarLocalStorage";
 import {
   toDatePickerString,
   toDatePickerStringDaysFromNow,
   toDatePickerStringNow,
 } from "./utils/date";
 
-export function runApp(el: HTMLElement) {
-  renderTaskList(el);
+let calendarApi: CalendarApi;
+let tasksTable: HTMLTableElement;
+let dateFrom: Date | undefined;
+let dateTo: Date | undefined;
+
+export async function runApp(el: HTMLElement) {
+  renderTaskListHTML(el);
+  setCalendarApi();
   addListeners();
+
+  fillTasksTable(dateFrom, dateTo);
 }
 
 const ID_TASKS_FILTER_PATTERN = "tasks-filter-pattern";
@@ -24,21 +34,21 @@ function addListeners(/*el: HTMLElement*/) {
   ) as HTMLInputElement;
   const dtpDateTo = document.getElementById(ID_DTP_DATE_TO) as HTMLInputElement;
   const btnAddTask = document.getElementById(ID_BTN_ADD_TASK);
-  const tasksTable = document.getElementById(ID_TASKS_TABLE);
+  tasksTable = document.getElementById(ID_TASKS_TABLE) as HTMLTableElement;
 
   tasksFilterPattern?.addEventListener("change", () => {});
 
   dtpDateFrom?.addEventListener("change", () => {
-    const dateFrom: Date = new Date(dtpDateFrom.value);
-    const dateTo: Date = new Date(dtpDateTo.value);
+    dateFrom = new Date(dtpDateFrom.value);
+    dateTo = new Date(dtpDateTo.value);
     if (dateTo < dateFrom) {
       dtpDateTo.value = toDatePickerString(dateFrom);
     }
   });
 
   dtpDateTo?.addEventListener("change", () => {
-    const dateFrom: Date = new Date(dtpDateFrom.value);
-    const dateTo: Date = new Date(dtpDateTo.value);
+    dateFrom = new Date(dtpDateFrom.value);
+    dateTo = new Date(dtpDateTo.value);
     if (dateTo < dateFrom) {
       dtpDateFrom.value = toDatePickerString(dateTo);
     }
@@ -49,7 +59,38 @@ function addListeners(/*el: HTMLElement*/) {
   tasksTable?.addEventListener("click", () => {});
 }
 
-function renderTaskList(el: HTMLElement) {
+async function fillTasksTable(
+  dateFrom?: Date,
+  dateTo?: Date,
+  // textPattern?: string,
+) {
+  const tasks: Task[] = await calendarApi.getTasksByDate(dateFrom, dateTo);
+
+  let tasksTableBody = tasksTable.querySelector("tbody");
+  if (!tasksTableBody) {
+    tasksTableBody = document.createElement("tbody");
+    tasksTable.appendChild(tasksTableBody);
+  }
+  tasksTableBody.innerHTML = tasks
+    .map(
+      (task) => `
+    <tr>
+      <td>${task.name}</td>
+      <td>${task.categories.join(", ")}</td>
+      <td>${new Date(task.date).toLocaleDateString()}</td>
+      <td>${new Date(task.createdAt).toLocaleDateString()}</td>
+      <!--td>${task.createdAt}</td-->
+    </tr>
+    `,
+    )
+    .join();
+}
+
+function setCalendarApi() {
+  calendarApi = new CalendarLocalStorage();
+}
+
+function renderTaskListHTML(el: HTMLElement) {
   el.innerHTML = `
   <!DOCTYPE html>
   <html lang="ru">
@@ -73,12 +114,12 @@ function renderTaskList(el: HTMLElement) {
           <thead>
               <tr>
                   <th>Название задачи</th>
+                  <th>Категории</th>
                   <th>Дата выполнения</th>
-                  <th>Действия</th>
+                  <th>Дата создания</th>
               </tr>
           </thead>
-          <tbody>
-              <!-- Здесь будут данные задач -->
+          <tbody>              
           </tbody>
       </table>
   </body>
