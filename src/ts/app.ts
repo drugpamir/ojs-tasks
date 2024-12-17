@@ -1,5 +1,6 @@
 import { CalendarApi, type Task } from "./api/calendarApi";
 import { CalendarLocalStorage } from "./api/calendarLocalStorage";
+// import { generateTask } from "./utils/dataGenerator";
 import {
   toDatePickerString,
   toDatePickerStringDaysFromNow,
@@ -15,6 +16,9 @@ export async function runApp(el: HTMLElement) {
   renderTaskListHTML(el);
   setCalendarApi();
   addListeners();
+
+  // const task = await calendarApi.createTask(generateTask(1));
+  // console.log(task);
 
   fillTasksTable(dateFrom, dateTo);
 }
