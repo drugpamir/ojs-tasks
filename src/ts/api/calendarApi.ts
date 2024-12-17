@@ -15,5 +15,5 @@ export interface CalendarApi {
 
   getTasks(): Promise<Task[]>;
 
-  getTasksByDate(dateFrom: Date, dateTo: Date): Promise<Task[]>;
+  getTasksByDate(dateFrom?: Date, dateTo?: Date): Promise<Task[]>;
 }

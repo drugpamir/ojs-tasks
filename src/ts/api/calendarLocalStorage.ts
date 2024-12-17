@@ -20,7 +20,9 @@ export class CalendarLocalStorage implements CalendarApi {
   async getTasksByDate(dateFrom: Date, dateTo: Date): Promise<Task[]> {
     const storedTasks: Task[] = this.#getTasksSync();
     return storedTasks.filter(
-      (task) => task.date >= dateFrom && task.date <= dateTo,
+      (task) =>
+        (!dateFrom || task.date >= dateFrom) &&
+        (!dateTo || task.date <= dateTo),
     );
   }
 
