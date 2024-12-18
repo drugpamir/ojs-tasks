@@ -6,6 +6,13 @@ import {
   toDatePickerStringNow,
 } from "./utils/date";
 
+const ID_CB_STORAGE_TYPE = "dd-calendar-api-type";
+const ID_TASKS_FILTER_PATTERN = "tasks-filter-pattern";
+const ID_DTP_DATE_FROM = "date-from";
+const ID_DTP_DATE_TO = "date-to";
+const ID_BTN_ADD_TASK = "btn-add-tasks";
+const ID_TASKS_TABLE = "tasks-table";
+
 let calendarApi: CalendarApi;
 let tasksTable: HTMLTableElement;
 let dateFrom: Date | undefined;
@@ -16,13 +23,6 @@ export async function runApp(el: HTMLElement) {
   addListeners(el);
   fillTasksTable(dateFrom, dateTo);
 }
-
-const ID_CB_STORAGE_TYPE = "dd-calendar-api-type";
-const ID_TASKS_FILTER_PATTERN = "tasks-filter-pattern";
-const ID_DTP_DATE_FROM = "date-from";
-const ID_DTP_DATE_TO = "date-to";
-const ID_BTN_ADD_TASK = "btn-add-tasks";
-const ID_TASKS_TABLE = "tasks-table";
 
 function addListeners(el: HTMLElement) {
   const cbStorageType = el.querySelector(`#${ID_CB_STORAGE_TYPE}`);
@@ -72,6 +72,11 @@ function addListeners(el: HTMLElement) {
   });
 }
 
+function setCalendarApi(el: HTMLElement, newCalendarApi: CalendarApi) {
+  calendarApi = newCalendarApi;
+  fillTasksTable(dateFrom, dateTo);
+}
+
 async function fillTasksTable(
   dateFrom?: Date,
   dateTo?: Date,
@@ -97,12 +102,6 @@ async function fillTasksTable(
     `,
     )
     .join();
-}
-
-function setCalendarApi(el: HTMLElement, newCalendarApi: CalendarApi) {
-  console.log("new calendarApi:", newCalendarApi);
-  calendarApi = newCalendarApi;
-  fillTasksTable(dateFrom, dateTo);
 }
 
 function renderTaskListHTML(el: HTMLElement) {
