@@ -1,7 +1,5 @@
 import { CalendarApi, type Task } from "./api/calendarApi";
-import { CalendarDummyStorage } from "./api/calendarDummyStorage";
-import { CalendarFireBaseStorage } from "./api/calendarFireBaseStorage";
-import { CalendarLocalStorage } from "./api/calendarLocalStorage";
+import { calendarApiTypes } from "./api/calendarApiTypes";
 import {
   toDatePickerString,
   toDatePickerStringDaysFromNow,
@@ -13,18 +11,8 @@ let tasksTable: HTMLTableElement;
 let dateFrom: Date | undefined;
 let dateTo: Date | undefined;
 
-type CalendarApiLibrary = {
-  [key: string]: CalendarApi;
-};
-const calendarApiTypes: CalendarApiLibrary = {
-  CalendarDummyStorage: new CalendarDummyStorage(),
-  CalendarLocalStorage: new CalendarLocalStorage(),
-  CalendarFireBaseStorage: new CalendarFireBaseStorage(),
-};
-
 export async function runApp(el: HTMLElement) {
   renderTaskListHTML(el);
-  setCalendarApi(el, calendarApiTypes.CalendarDummyStorage);
   addListeners(el);
   fillTasksTable(dateFrom, dateTo);
 }
@@ -56,6 +44,7 @@ function addListeners(el: HTMLElement) {
       calendarApiTypes[(ev.target as HTMLSelectElement).value],
     ),
   );
+  cbStorageType?.dispatchEvent(new Event("change"));
 
   tasksFilterPattern?.addEventListener("change", () => {});
 
