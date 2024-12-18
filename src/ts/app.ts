@@ -37,24 +37,20 @@ const ID_BTN_ADD_TASK = "btn-add-tasks";
 const ID_TASKS_TABLE = "tasks-table";
 
 function addListeners(el: HTMLElement) {
-  const cbStorageType = document.getElementById(
-    ID_CB_STORAGE_TYPE,
-  ) as HTMLSelectElement;
+  const cbStorageType = el.querySelector(`#${ID_CB_STORAGE_TYPE}`);
 
-  const tasksFilterPattern = document.getElementById(
-    ID_TASKS_FILTER_PATTERN,
+  const tasksFilterPattern = el.querySelector(`#${ID_TASKS_FILTER_PATTERN}`);
+
+  const dtpDateFrom = el.querySelector(
+    `#${ID_DTP_DATE_FROM}`,
   ) as HTMLInputElement;
+  const dtpDateTo = el.querySelector(`#${ID_DTP_DATE_TO}`) as HTMLInputElement;
 
-  const dtpDateFrom = document.getElementById(
-    ID_DTP_DATE_FROM,
-  ) as HTMLInputElement;
-  const dtpDateTo = document.getElementById(ID_DTP_DATE_TO) as HTMLInputElement;
+  const btnAddTask = el.querySelector(`#${ID_BTN_ADD_TASK}`);
 
-  const btnAddTask = document.getElementById(ID_BTN_ADD_TASK);
+  tasksTable = el.querySelector(`#${ID_TASKS_TABLE}`) as HTMLTableElement;
 
-  tasksTable = document.getElementById(ID_TASKS_TABLE) as HTMLTableElement;
-
-  cbStorageType.addEventListener("change", (ev) =>
+  cbStorageType?.addEventListener("change", (ev) =>
     setCalendarApi(
       el,
       calendarApiTypes[(ev.target as HTMLSelectElement).value],
