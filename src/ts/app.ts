@@ -1,6 +1,7 @@
 import { CalendarApi, type Task } from "./api/calendarApi";
 import { CalendarDummyStorage } from "./api/calendarDummyStorage";
-// import { CalendarLocalStorage } from "./api/calendarLocalStorage";
+import { CalendarFireBaseStorage } from "./api/calendarFireBaseStorage";
+import { CalendarLocalStorage } from "./api/calendarLocalStorage";
 import {
   toDatePickerString,
   toDatePickerStringDaysFromNow,
@@ -12,29 +13,53 @@ let tasksTable: HTMLTableElement;
 let dateFrom: Date | undefined;
 let dateTo: Date | undefined;
 
+type CalendarApiLibrary = {
+  [key: string]: CalendarApi;
+};
+const calendarApiTypes: CalendarApiLibrary = {
+  CalendarDummyStorage: new CalendarDummyStorage(),
+  CalendarLocalStorage: new CalendarLocalStorage(),
+  CalendarFireBaseStorage: new CalendarFireBaseStorage(),
+};
+
 export async function runApp(el: HTMLElement) {
   renderTaskListHTML(el);
-  setCalendarApi();
-  addListeners();
+  setCalendarApi(el, calendarApiTypes.CalendarDummyStorage);
+  addListeners(el);
   fillTasksTable(dateFrom, dateTo);
 }
 
+const ID_CB_STORAGE_TYPE = "dd-calendar-api-type";
 const ID_TASKS_FILTER_PATTERN = "tasks-filter-pattern";
 const ID_DTP_DATE_FROM = "date-from";
 const ID_DTP_DATE_TO = "date-to";
 const ID_BTN_ADD_TASK = "btn-add-tasks";
 const ID_TASKS_TABLE = "tasks-table";
 
-function addListeners(/*el: HTMLElement*/) {
+function addListeners(el: HTMLElement) {
+  const cbStorageType = document.getElementById(
+    ID_CB_STORAGE_TYPE,
+  ) as HTMLSelectElement;
+
   const tasksFilterPattern = document.getElementById(
     ID_TASKS_FILTER_PATTERN,
   ) as HTMLInputElement;
+
   const dtpDateFrom = document.getElementById(
     ID_DTP_DATE_FROM,
   ) as HTMLInputElement;
   const dtpDateTo = document.getElementById(ID_DTP_DATE_TO) as HTMLInputElement;
+
   const btnAddTask = document.getElementById(ID_BTN_ADD_TASK);
+
   tasksTable = document.getElementById(ID_TASKS_TABLE) as HTMLTableElement;
+
+  cbStorageType.addEventListener("change", (ev) =>
+    setCalendarApi(
+      el,
+      calendarApiTypes[(ev.target as HTMLSelectElement).value],
+    ),
+  );
 
   tasksFilterPattern?.addEventListener("change", () => {});
 
@@ -89,8 +114,10 @@ async function fillTasksTable(
     .join();
 }
 
-function setCalendarApi() {
-  calendarApi = new CalendarDummyStorage();
+function setCalendarApi(el: HTMLElement, newCalendarApi: CalendarApi) {
+  console.log("new calendarApi:", newCalendarApi);
+  calendarApi = newCalendarApi;
+  fillTasksTable(dateFrom, dateTo);
 }
 
 function renderTaskListHTML(el: HTMLElement) {
@@ -107,6 +134,11 @@ function renderTaskListHTML(el: HTMLElement) {
       <h1>Список задач</h1>
       
       <div>
+          <select id=${ID_CB_STORAGE_TYPE}>
+              <option value="CalendarDummyStorage" selected>Тестовые данные</option>
+              <option value="CalendarLocalStorage">Локальное хранилище</option>
+              <option value="CalendarFirebaseStorage">Внешнее хранилище</option>
+          </select>
           <input type="text" id=${ID_TASKS_FILTER_PATTERN} placeholder="Название, описание">
           <input type="date" id=${ID_DTP_DATE_FROM} value=${toDatePickerStringNow()}>
           <input type="date" id=${ID_DTP_DATE_TO} value=${toDatePickerStringDaysFromNow(3)}>
