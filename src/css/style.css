@@ -17,6 +17,12 @@ input[type="date"] {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+input:valid {
+  background-color: white;
+}
+input:invalid {
+  background-color: lightpink;
+}
 button {
   padding: 10px 15px;
   background-color: #5cb85c;
@@ -59,11 +65,25 @@ tr:nth-child(odd).tr-selected {
   background-color: #f1f1f1;
 } */
 
-.pagination {
+.modal {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: none;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modalContent {
+  padding: 25px;
+  background: white;
+  border-radius: 16px;
+  min-width: 250px;
+}
+
+.modal.active {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
-}
-.pagination button {
-  margin: 0 10px;
+  align-items: center;
 }

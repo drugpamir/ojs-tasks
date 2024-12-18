@@ -6,12 +6,13 @@ import {
   toDatePickerStringNow,
 } from "./utils/date";
 
-const ID_CB_STORAGE_TYPE = "dd-calendar-api-type";
-const ID_TASKS_FILTER_PATTERN = "tasks-filter-pattern";
-const ID_DTP_DATE_FROM = "date-from";
-const ID_DTP_DATE_TO = "date-to";
+const ID_TASKS_FILTER_CB_STORAGE_TYPE = "dd-calendar-api-type";
+const ID_TASKS_FILTER_NAME_PATTERN = "tasks-filter-pattern";
+const ID_TASKS_FILTER_DATE_FROM = "tasks-filter-date-from";
+const ID_TASKS_FILTER_DATE_TO = "tasks-filter-date-to";
 const ID_BTN_ADD_TASK = "btn-add-tasks";
 const ID_TASKS_TABLE = "tasks-table";
+const ID_FORM_CREATE_TASK = "form-create-task";
 
 let calendarApi: CalendarApi;
 let tasksTable: HTMLTableElement;
@@ -25,14 +26,18 @@ export async function runApp(el: HTMLElement) {
 }
 
 function addListeners(el: HTMLElement) {
-  const cbStorageType = el.querySelector(`#${ID_CB_STORAGE_TYPE}`);
+  const cbStorageType = el.querySelector(`#${ID_TASKS_FILTER_CB_STORAGE_TYPE}`);
 
-  const tasksFilterPattern = el.querySelector(`#${ID_TASKS_FILTER_PATTERN}`);
+  const tasksFilterPattern = el.querySelector(
+    `#${ID_TASKS_FILTER_NAME_PATTERN}`,
+  );
 
   const dtpDateFrom = el.querySelector(
-    `#${ID_DTP_DATE_FROM}`,
+    `#${ID_TASKS_FILTER_DATE_FROM}`,
   ) as HTMLInputElement;
-  const dtpDateTo = el.querySelector(`#${ID_DTP_DATE_TO}`) as HTMLInputElement;
+  const dtpDateTo = el.querySelector(
+    `#${ID_TASKS_FILTER_DATE_TO}`,
+  ) as HTMLInputElement;
 
   const btnAddTask = el.querySelector(`#${ID_BTN_ADD_TASK}`);
 
@@ -64,7 +69,7 @@ function addListeners(el: HTMLElement) {
     }
   });
 
-  btnAddTask?.addEventListener("click", () => {});
+  btnAddTask?.addEventListener("click", () => createTaskForm(el));
 
   tasksTable.addEventListener("click", (ev) => {
     const rowElement = (ev.target as HTMLElement).closest("tr");
@@ -94,7 +99,7 @@ async function fillTasksTable(
       (task) => `
     <tr>
       <td>${task.name}</td>
-      <td>${task.categories.join(", ")}</td>
+      <td>${task.categories?.join(", ")}</td>
       <td>${new Date(task.date).toLocaleDateString()}</td>
       <td>${new Date(task.createdAt).toLocaleDateString()}</td>
       <!--td>${task.createdAt}</td-->
@@ -102,6 +107,84 @@ async function fillTasksTable(
     `,
     )
     .join();
+}
+
+function createTaskForm(el: HTMLElement) {
+  const formEl = el.querySelector(`#${ID_FORM_CREATE_TASK}`);
+  if (!formEl) {
+    return;
+  }
+  const ID_CREATING_TASK_NAME = "creating-task-name";
+  const ID_CREATING_TASK_DESCRIPTION = "creating-task-description";
+  const ID_CREATING_TASK_DUE_DATE = "creating-task-due-date";
+  const ID_CREATING_TASK_SUBMIT = "creating-task-submit";
+
+  formEl.classList.add("modal", "active");
+  formEl.innerHTML = `
+    <div class="modalContent">
+      <input
+        type="text"
+        id="${ID_CREATING_TASK_NAME}"
+        placeholder="Название задачи"
+        pattern="[a-zA-Zа-яА-Я0-9]{3,50}"
+        required
+      />
+      <input
+        type="text"
+        id="${ID_CREATING_TASK_DESCRIPTION}"
+        placeholder="Категории"
+        value=""
+      />
+      <input
+        type="date"
+        id="${ID_CREATING_TASK_DUE_DATE}"
+        placeholder="Дата выполнения задачи"
+        value="${toDatePickerStringDaysFromNow(1)}"
+        required
+      />
+      <button type="submit" id="${ID_CREATING_TASK_SUBMIT}">
+        Создать задачу
+      </button>
+    </div>`;
+  console.log(formEl.outerHTML);
+
+  //Скрытие формы в случае клика мимо неё
+  formEl.addEventListener("click", () => {
+    formEl.classList.remove("modal", "active");
+    formEl.innerHTML = "";
+  });
+  //Форма остаётся видимой в случае клика на неё в область мимо её инпутов
+  formEl
+    .querySelector(".modalContent")
+    ?.addEventListener("click", (ev) => ev.stopPropagation());
+
+  const inputCreatingTaskName = formEl.querySelector(
+    `#${ID_CREATING_TASK_NAME}`,
+  ) as HTMLInputElement;
+  const inputCreatingTaskDescription = formEl.querySelector(
+    `#${ID_CREATING_TASK_DESCRIPTION}`,
+  ) as HTMLInputElement;
+  const inputCreatingTaskDueDate = formEl.querySelector(
+    `#${ID_CREATING_TASK_DUE_DATE}`,
+  ) as HTMLInputElement;
+  // const btnFormCreateTask = formEl.querySelector(`[type="submit"]`);
+  const btnFormCreateTask = formEl.querySelector(`#${ID_CREATING_TASK_SUBMIT}`);
+  btnFormCreateTask?.addEventListener("click", async (ev) => {
+    ev.preventDefault();
+    if (!inputCreatingTaskName?.value) {
+      window.alert("Укажите имя задачи");
+      return;
+    }
+    formEl.classList.remove("modal", "active");
+    formEl.innerHTML = "";
+    const createdTask: Task = await calendarApi.createTask({
+      name: inputCreatingTaskName?.value,
+      categories: inputCreatingTaskDescription?.value.split(" "),
+      date: new Date(inputCreatingTaskDueDate?.value),
+    });
+    console.log(createdTask);
+    fillTasksTable(dateFrom, dateTo);
+  });
 }
 
 function renderTaskListHTML(el: HTMLElement) {
@@ -116,16 +199,17 @@ function renderTaskListHTML(el: HTMLElement) {
   </head>
   <body>
       <h1>Список задач</h1>
-      
+      <form id=${ID_FORM_CREATE_TASK}>
+      </form>
       <div>
-          <select id=${ID_CB_STORAGE_TYPE}>
+          <select id=${ID_TASKS_FILTER_CB_STORAGE_TYPE}>
               <option value="CalendarDummyStorage" selected>Тестовые данные</option>
               <option value="CalendarLocalStorage">Локальное хранилище</option>
               <option value="CalendarFirebaseStorage">Внешнее хранилище</option>
           </select>
-          <input type="text" id=${ID_TASKS_FILTER_PATTERN} placeholder="Название, описание">
-          <input type="date" id=${ID_DTP_DATE_FROM} value=${toDatePickerStringNow()}>
-          <input type="date" id=${ID_DTP_DATE_TO} value=${toDatePickerStringDaysFromNow(3)}>
+          <input type="text" id=${ID_TASKS_FILTER_NAME_PATTERN} placeholder="Название, описание">
+          <input type="date" id=${ID_TASKS_FILTER_DATE_FROM} value=${toDatePickerStringNow()}>
+          <input type="date" id=${ID_TASKS_FILTER_DATE_TO} value=${toDatePickerStringDaysFromNow(3)}>
           <button id=${ID_BTN_ADD_TASK}>Добавить задачу</button>
       </div>
 
